@@ -9,10 +9,12 @@ public class RoamingTask {
 
     private final Area roamArea;
     private final Random random;
+    private long lastRoamTime;  // Timestamp of the last roam
 
     public RoamingTask(Area roamArea) {
         this.roamArea = roamArea;
         this.random = new Random();
+        this.lastRoamTime = System.currentTimeMillis();
     }
 
     public void execute(Player localPlayer, boolean isInCombat) {
@@ -25,17 +27,18 @@ public class RoamingTask {
         if (!roamArea.contains(localPlayer)) {
             // If not, walk back to the roamArea
             Walking.walk(roamArea.getRandomTile());
+            lastRoamTime = System.currentTimeMillis();  // Update the timestamp
         } else {
-            // If yes, walk to a random tile within the roamArea
-            Walking.walk(roamArea.getRandomTile());
-        }
-
-        // Sleep for a random period between 5 and 30 seconds
-        try {
-            Thread.sleep((random.nextInt(26) + 5) * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            // Check if enough time has passed since the last roam (e.g., 30 seconds)
+            if (System.currentTimeMillis() - lastRoamTime >= 7 * 1000) {
+                // If yes, walk to a random tile within the roamArea
+                Walking.walk(roamArea.getRandomTile());
+                lastRoamTime = System.currentTimeMillis();  // Update the timestamp
+            }
         }
     }
 }
+
+
+
 

@@ -7,6 +7,10 @@ import tasks.AreaTask;
 import tasks.FightingTask;
 import tasks.RoamingTask;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import static org.dreambot.api.methods.interactive.Players.getLocal;
 
 @ScriptManifest(name = "F2P Mage Pker", description = "My first pk bot", author = "Dyno",
@@ -18,6 +22,8 @@ public class main extends AbstractScript {
     private AreaTask areaTask;
     private Area roamArea;
 
+    private ScheduledExecutorService executorService;
+
     @Override
     public void onStart() {
         roamArea = new Area(3074, 3546, 3097, 3525);
@@ -26,6 +32,9 @@ public class main extends AbstractScript {
         this.roamingTask = new RoamingTask(roamArea);
         this.fightingTask = new FightingTask(foodName);
         this.areaTask = new AreaTask(roamArea);
+
+        // Initialize ScheduledExecutorService
+        this.executorService = Executors.newScheduledThreadPool(1);
     }
 
     @Override
@@ -35,21 +44,25 @@ public class main extends AbstractScript {
         if (localPlayer != null) {
             if (localPlayer.isInCombat()) {
                 fightingTask.execute();
-                // Roaming task should be paused if the player is in combat
-                roamingTask.execute(localPlayer, true);
             } else if (!roamArea.contains(localPlayer)) {
                 areaTask.execute(localPlayer);
-                // Roaming task should be resumed if the player is not in combat
-                roamingTask.execute(localPlayer, false);
-            } else {
-                roamingTask.execute(localPlayer, false);
+            } else if (!localPlayer.isMoving()) {
+                roamingTask.execute(localPlayer, localPlayer.isInCombat());
             }
         }
 
         // Return a short sleep time so that the onLoop method runs frequently
         return 50;
     }
+
+
+    @Override
+    public void onExit() {
+        // Shutdown the executor service when the script stops
+        executorService.shutdown();
+    }
 }
+
 
 
 
