@@ -7,6 +7,7 @@ import tasks.AreaTask;
 import tasks.FightingTask;
 import tasks.RoamingTask;
 
+import java.awt.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +22,8 @@ public class main extends AbstractScript {
     private FightingTask fightingTask;
     private AreaTask areaTask;
     private Area roamArea;
+    private String currentAction = "Starting up...";
+
 
     private ScheduledExecutorService executorService;
 
@@ -36,6 +39,11 @@ public class main extends AbstractScript {
         // Initialize ScheduledExecutorService
         this.executorService = Executors.newScheduledThreadPool(1);
     }
+    @Override
+    public void onPaint(Graphics2D g) {
+        g.setColor(Color.WHITE);
+        g.drawString("Current action: " + currentAction, 10, 30);
+    }
 
     @Override
     public int onLoop() {
@@ -43,15 +51,17 @@ public class main extends AbstractScript {
 
         if (localPlayer != null) {
             if (localPlayer.isInCombat()) {
+                currentAction = "Fighting";
                 fightingTask.execute();
             } else if (!roamArea.contains(localPlayer)) {
+                currentAction = "Returning to roam area";
                 areaTask.execute(localPlayer);
             } else if (!localPlayer.isMoving()) {
+                currentAction = "Roaming";
                 roamingTask.execute(localPlayer, localPlayer.isInCombat());
             }
         }
 
-        // Return a short sleep time so that the onLoop method runs frequently
         return 50;
     }
 
