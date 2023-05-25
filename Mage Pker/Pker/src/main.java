@@ -42,14 +42,31 @@ public class main extends AbstractScript {
     @Override
     public void onPaint(Graphics2D g) {
         g.setColor(Color.WHITE);
-        g.drawString("Current action: " + currentAction, 10, 30);
+        g.setFont(new Font("Arial", Font.BOLD, 14));
+
+        int y = 40;  // Start y coordinate for text
+        int dy = 15; // Amount to increment y coordinate for each line of text
+        int x = 10;  // x coordinate for text
+
+        g.drawString("Current HP: " + fightingTask.getCurrentHPPercent() + "%", x, y);
+        y += dy;
+        Player targetPlayer = fightingTask.getTargetPlayer();
+        g.drawString("Target Player: " + (targetPlayer != null ? targetPlayer.getName() : "None"), x, y);
+        y += dy;
+        g.drawString("Local Player Combat Level: " + fightingTask.getLocalPlayerCombatLevel(), x, y);
+        y += dy;
+        g.drawString("Wilderness Level: " + fightingTask.getWildernessLevel(), x, y);
     }
+
+
 
     @Override
     public int onLoop() {
         Player localPlayer = getLocal();
 
         if (localPlayer != null) {
+            fightingTask.execute();
+
             if (localPlayer.isInCombat()) {
                 currentAction = "Fighting";
                 fightingTask.execute();

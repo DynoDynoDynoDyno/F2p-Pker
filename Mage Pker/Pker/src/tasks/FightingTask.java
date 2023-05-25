@@ -10,6 +10,10 @@ import static org.dreambot.api.utilities.Logger.log;
 public class FightingTask {
 
     private final String foodName;
+    private Player targetPlayer;
+    private int currentHPPercent;
+    private int localPlayerCombatLevel;
+    private int wildernessLevel;
 
     public FightingTask(String foodName) {
         this.foodName = foodName;
@@ -17,10 +21,10 @@ public class FightingTask {
 
     public void execute() {
         Player localPlayer = Players.getLocal();
-        int localPlayerCombatLevel = localPlayer.getLevel();
-        int wildernessLevel = Combat.getWildernessLevel();
+        localPlayerCombatLevel = localPlayer.getLevel();
+        wildernessLevel = Combat.getWildernessLevel();
 
-        int currentHPPercent = Combat.getHealthPercent();
+        currentHPPercent = Combat.getHealthPercent();
         log("Current HP: " + currentHPPercent + "%");
 
         if (currentHPPercent <= 50) {
@@ -28,7 +32,7 @@ public class FightingTask {
             Inventory.interact(foodName);  // Replace 'foodName' with the name of your food
         }
 
-        Player targetPlayer = Players.closest(p -> p != null && !p.equals(localPlayer) &&
+        targetPlayer = Players.closest(p -> p != null && !p.equals(localPlayer) &&
                 Math.abs(p.getLevel() - localPlayerCombatLevel) <= wildernessLevel &&
                 !p.isInCombat());
 
@@ -37,4 +41,22 @@ public class FightingTask {
             targetPlayer.interact("Attack");
         }
     }
+
+    public Player getTargetPlayer() {
+        return targetPlayer;
+    }
+
+    public int getCurrentHPPercent() {
+        return currentHPPercent;
+    }
+
+    public int getLocalPlayerCombatLevel() {
+        return localPlayerCombatLevel;
+    }
+
+    public int getWildernessLevel() {
+        return wildernessLevel;
+    }
 }
+
+
